@@ -1,6 +1,7 @@
-# Vivado MODULE NAME
+# Vivado Hermes If 2 AXIS If
 
-This repo contains scripts to recreate **DESCRIBE THE MODULE HERE**. The project is setup for Zedboard, although it would be easy to change to other boards assuming you have some basic TCL skills.
+This repo contains scripts to recreate a module to convert the Hermes Master interface in to a AXI Streaming interface. Basically, it adds the tlast AXI signal to the Hermes interface.
+The project is setup for Zedboard, although it would be easy to change to other boards assuming you have some basic TCL skills.
 
 # Module/IP design
 
@@ -10,23 +11,20 @@ Describe here your module interface and protocols.
 
 # How to use this repository
 
-These scripts presented here are quite reusable if you keep the same dir structure. It should be useful for other Vivado/SDK projects with minor efforts. For this reason this repository is a template. Just click in **Use this Template** button to replicate it for your own project.
-
-In command line, create an empty repository called *<your-reponame>* in github and follow these steps to use it as a template:
+This repository might have custom IPs included as git submodules. Thus, the following command is required to download all its dependencies.
 
 ```
-mkdir <my-new-project>
-cd <my-new-project>
-git clone https://github.com/amamory/vivado-base-project.git .
-rm -rf .git
-git init
-git remote set-url origin https://github.com/<your-username>/<your-reponame>
-git add * .gitignore
-git commit -m "my initial commit"
-git push origin master
+git clone --recursive https://github.com/amamory/<repo-name>.git
 ```
 
-Each directory has instructions related to the kind of file you have to place in them.
+If you already cloned the repository without `--recursive`, then run the following command to download all the submodules.
+
+```
+git submodule update --init --recursive
+```
+
+Refer to this [tutorial](https://www.vogella.com/tutorials/GitSubmodules/article.html) to learn how to manage submodules.
+
 
 # How to run it
 
