@@ -17,7 +17,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.std_logic_unsigned.all;
 
-entity Last_gen is
+entity last_gen_ip is
 generic (
     TAM_FLIT : integer := 32;
 -- the max packet size is 2^max_packet_size
@@ -37,9 +37,9 @@ port(
         data_i:   in  std_logic_vector(TAM_FLIT-1 downto 0);
         ready_o:  out  std_logic
 );
-end Last_gen;
+end last_gen_ip;
 
-architecture Last_gen of Last_gen is
+architecture last_gen_ip of last_gen_ip is
 
 type state_type is (WAIT_HEADER,HEADER,PKT_SIZE,PAYLOAD,LAST_FLIT);
 signal state: state_type;
@@ -128,4 +128,4 @@ begin
     
     --lastL_o <= '1' when  readyL_s = '1' and valid_s = '1' and state = LAST_FLIT else '0';
 
-end Last_gen;
+end last_gen_ip;
