@@ -44,9 +44,6 @@ architecture last_gen_ip of last_gen_ip is
 type state_type is (WAIT_HEADER,HEADER,PKT_SIZE,PAYLOAD,LAST_FLIT);
 signal state: state_type;
 
---constant MAX_PACKET_SIZE : integer := 10;
---constant TAM_FLIT : integer := 32;
-
 signal flit_cnt: std_logic_vector(MAX_PACKET_SIZE-1 downto 0);
 signal data_s: std_logic_vector(TAM_FLIT-1 downto 0);
 signal valid_s, readyL_s , lastL_s: std_logic;
@@ -57,72 +54,76 @@ begin
     dataL_o  <= data_s;
     ready_o  <= readyL_s;
     
-    process(reset_n, clock)
+    process(clock)
     begin
-        if reset_n='1' then
-            valid_s <= '0';
-            data_s  <= (others => '0');
-            readyL_s  <= '0';
-            lastL_o <= '0';
-        elsif clock'event and clock='1' then
-            valid_s <= valid_i;
-            data_s  <= data_i;
-            readyL_s  <= readyL_i;
-            lastL_o   <= lastL_s;
+        if clock'event and clock='1' then
+            if reset_n='0' then
+                valid_s <= '0';
+                data_s  <= (others => '0');
+                readyL_s  <= '0';
+                lastL_o <= '0';
+            else
+                valid_s <= valid_i;
+                data_s  <= data_i;
+                readyL_s  <= readyL_i;
+                lastL_o   <= lastL_s;
+            end if;
         end if;
     end process;    
     
     
-    process(reset_n,clock)
+    process(clock)
     begin
-        if reset_n='1' then
-            state<=WAIT_HEADER;
-            flit_cnt <= (others => '0'); 
-            lastL_s <= '0';
-        elsif clock'event and clock='0' then
-            case state is
-                when WAIT_HEADER => 
-                    flit_cnt <= (others => '0'); 
-                    lastL_s <= '0';
-                    state <= WAIT_HEADER;
-                    if readyL_i = '1' and valid_i = '1' then
-                        state <= HEADER;
-                    end if;
-                when HEADER =>
-                    state <= HEADER;
-                    if readyL_i = '1' and valid_i = '1' then
-                        state <= PKT_SIZE;
-                        flit_cnt <= data_i(MAX_PACKET_SIZE-1 downto 0);
-                    end if;
-                when PKT_SIZE =>
-                    state <= PKT_SIZE;
-                    if readyL_i = '1' and valid_i = '1' then
-                        if flit_cnt = 1 then
-                            state <= WAIT_HEADER;
-                            lastL_s <= '1';
-                        else
-                            state <= PAYLOAD;
-                         end if; 
-                    end if;
-                when PAYLOAD =>
-                    state <= PAYLOAD;
-                    if readyL_i = '1' and valid_i = '1' then
-                        flit_cnt <= flit_cnt -1;
-                        if flit_cnt = x"0002" then
-                            state <= WAIT_HEADER;
-                            lastL_s <= '1';
-                        end if;
-                    end if;
-                when LAST_FLIT =>
-                    lastL_s <= '0';
-                    state <= LAST_FLIT;
-                    if readyL_i = '1' and valid_i = '1' then
+        if clock'event and clock='0' then
+            if reset_n='0' then
+                state<=WAIT_HEADER;
+                flit_cnt <= (others => '0'); 
+                lastL_s <= '0';
+            else
+                case state is
+                    when WAIT_HEADER => 
+                        flit_cnt <= (others => '0'); 
+                        lastL_s <= '0';
                         state <= WAIT_HEADER;
-                        
-                    end if;
-                when others => 
-                    state <= WAIT_HEADER;
-            end case;
+                        if readyL_i = '1' and valid_i = '1' then
+                            state <= HEADER;
+                        end if;
+                    when HEADER =>
+                        state <= HEADER;
+                        if readyL_i = '1' and valid_i = '1' then
+                            state <= PKT_SIZE;
+                            flit_cnt <= data_i(MAX_PACKET_SIZE-1 downto 0);
+                        end if;
+                    when PKT_SIZE =>
+                        state <= PKT_SIZE;
+                        if readyL_i = '1' and valid_i = '1' then
+                            if flit_cnt = 1 then
+                                state <= WAIT_HEADER;
+                                lastL_s <= '1';
+                            else
+                                state <= PAYLOAD;
+                            end if; 
+                        end if;
+                    when PAYLOAD =>
+                        state <= PAYLOAD;
+                        if readyL_i = '1' and valid_i = '1' then
+                            flit_cnt <= flit_cnt -1;
+                            if flit_cnt = x"0002" then
+                                state <= WAIT_HEADER;
+                                lastL_s <= '1';
+                            end if;
+                        end if;
+                    when LAST_FLIT =>
+                        lastL_s <= '0';
+                        state <= LAST_FLIT;
+                        if readyL_i = '1' and valid_i = '1' then
+                            state <= WAIT_HEADER;
+                            
+                        end if;
+                    when others => 
+                        state <= WAIT_HEADER;
+                end case;
+            end if;
         end if;
     end process;
     
